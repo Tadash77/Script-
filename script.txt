@@ -1,0 +1,51 @@
+-- Script gerado pelo modo de chat do Microsoft Bing
+-- Não testado nem garantido para funcionar
+-- Use por sua própria conta e risco
+
+local farm = false -- Variável para ativar ou desativar o farm de clike
+local coletar = false -- Variável para ativar ou desativar a coleta de itens
+
+local player = game.Players.LocalPlayer -- Referência ao jogador local
+local mouse = player:GetMouse() -- Referência ao mouse do jogador
+local sword = player.Backpack:FindFirstChild("Sword") -- Referência à espada do jogador
+
+-- Função para clicar na tela com a espada
+local function click()
+    if sword and sword.Parent == player.Character then -- Verifica se o jogador tem a espada equipada
+        mouse1click() -- Clica com o botão esquerdo do mouse
+        wait(0.1) -- Espera 0.1 segundos
+    end
+end
+
+-- Função para coletar todos os itens do jogo
+local function collect()
+    local items = game.Workspace:GetChildren() -- Obtém todos os objetos no jogo
+    for i, item in ipairs(items) do -- Percorre todos os objetos
+        if item:IsA("Tool") or item:IsA("Hat") then -- Verifica se o objeto é uma ferramenta ou um chapéu
+            fireclickdetector(item.ClickDetector) -- Clica no detector de clique do objeto
+            wait(0.1) -- Espera 0.1 segundos
+        end
+    end
+end
+
+-- Evento para detectar quando o jogador pressiona uma tecla
+mouse.KeyDown:Connect(function(key)
+    if key == "f" then -- Se a tecla for f
+        farm = not farm -- Inverte o valor da variável farm
+        print("Farm de clike: " .. tostring(farm)) -- Imprime o valor da variável farm
+    elseif key == "c" then -- Se a tecla for c
+        coletar = not coletar -- Inverte o valor da variável coletar
+        print("Coleta de itens: " .. tostring(coletar)) -- Imprime o valor da variável coletar
+    end
+end)
+
+-- Loop infinito para executar as funções
+while true do
+    if farm then -- Se a variável farm for verdadeira
+        click() -- Chama a função click
+    end
+    if coletar then -- Se a variável coletar for verdadeira
+        collect() -- Chama a função collect
+    end
+    wait() -- Espera um frame
+end
