@@ -1,51 +1,58 @@
--- Script gerado pelo modo de chat do Microsoft Bing
--- Não testado nem garantido para funcionar
--- Use por sua própria conta e risco
+local esp_enabled = false
+local fov_150_percent_enabled = false
 
-local farm = false -- Variável para ativar ou desativar o farm de clike
-local coletar = false -- Variável para ativar ou desativar a coleta de itens
+local screen_width = 1920
+local screen_height = 1080
+local center_x = screen_width // 2
+local center_y = screen_height // 2
+local enemy_color = {0, 255, 0}
 
-local player = game.Players.LocalPlayer -- Referência ao jogador local
-local mouse = player:GetMouse() -- Referência ao mouse do jogador
-local sword = player.Backpack:FindFirstChild("Sword") -- Referência à espada do jogador
-
--- Função para clicar na tela com a espada
-local function click()
-    if sword and sword.Parent == player.Character then -- Verifica se o jogador tem a espada equipada
-        mouse1click() -- Clica com o botão esquerdo do mouse
-        wait(0.1) -- Espera 0.1 segundos
-    end
-end
-
--- Função para coletar todos os itens do jogo
-local function collect()
-    local items = game.Workspace:GetChildren() -- Obtém todos os objetos no jogo
-    for i, item in ipairs(items) do -- Percorre todos os objetos
-        if item:IsA("Tool") or item:IsA("Hat") then -- Verifica se o objeto é uma ferramenta ou um chapéu
-            fireclickdetector(item.ClickDetector) -- Clica no detector de clique do objeto
-            wait(0.1) -- Espera 0.1 segundos
+local function draw_esp_lines()
+    for x = 0, screen_width, 10 do
+        for y = 0, screen_height, 10 do
+            local color = os.pixel(x, y)
+            if color[1] == enemy_color[1] and color[2] == enemy_color[2] and color[3] == enemy_color[3] then
+                os.drawline(x, y, 255, 0, 0)  -- Desenha uma linha vermelha nas posições dos inimigos
+            end
         end
     end
 end
 
--- Evento para detectar quando o jogador pressiona uma tecla
-mouse.KeyDown:Connect(function(key)
-    if key == "f" then -- Se a tecla for f
-        farm = not farm -- Inverte o valor da variável farm
-        print("Farm de clike: " .. tostring(farm)) -- Imprime o valor da variável farm
-    elseif key == "c" then -- Se a tecla for c
-        coletar = not coletar -- Inverte o valor da variável coletar
-        print("Coleta de itens: " .. tostring(coletar)) -- Imprime o valor da variável coletar
-    end
-end)
+local function adjust_fov_to_abdomen()
+    local mouse_x, mouse_y = os.mouse()
+    local angle = math.atan2(mouse_y - center_y, mouse_x - center_x)
+    local new_angle = angle + math.pi / 2  -- Ajusta para o abdômen
+    local new_x = center_x + 150 * math.cos(new_angle)  -- Distância fixa para o abdômen (ajuste conforme necessário)
+    local new_y = center_y + 150 * math.sin(new_angle)
+    os.mousemove(new_x, new_y)
+end
 
--- Loop infinito para executar as funções
+local function create_ui()
+    return {
+        {"Minimizar", function() os.minimize(); os.exit() end},
+        {"Abrir", os.restore},
+        {"ESP", os.checkbox(esp_enabled, function(value) esp_enabled = value end)},
+        {"FOV 150%", os.checkbox(fov_150_percent_enabled, function(value) fov_150_percent_enabled = value end)}
+    }
+end
+
+local ui = create_ui()
+os.start(ui, "UI com ESP e FOV 150%", 250, 150)
+
 while true do
-    if farm then -- Se a variável farm for verdadeira
-        click() -- Chama a função click
+    if esp_enabled then
+        draw_esp_lines()
     end
-    if coletar then -- Se a variável coletar for verdadeira
-        collect() -- Chama a função collect
+
+    if fov_150_percent_enabled then
+        adjust_fov_to_abdomen()
     end
-    wait() -- Espera um frame
+
+    os.sleep(0.01)
+
+    -- Verifique se as opções foram desativadas
+    if not esp_enabled and not fov_150_percent_enabled then
+        -- Adicione outras lógicas de parada se necessário
+        break
+    end
 end
